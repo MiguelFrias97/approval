@@ -4,17 +4,17 @@ module Approval
       include ::ActiveModel::Model
       include ::Approval::FormNotifiable
 
-      attr_accessor :user, :reason, :records
+      attr_accessor :user, :reason, :records, :tenant
 
-      def initialize(user:, reason:, records:)
+      def initialize(user:, reason:, records:, tenant:)
         @user    = user
         @reason  = reason
         @records = records
+        @tenant  = tenant
       end
 
-      validates :user,    presence: true
+      validates :user, :records, :tenant,  presence: true
       validates :reason,  presence: true, length: { maximum: Approval.config.comment_maximum }
-      validates :records, presence: true
 
       def save
         return false unless valid?
