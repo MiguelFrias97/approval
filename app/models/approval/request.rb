@@ -46,6 +46,13 @@ module Approval
       rejected_at.present?
     end
 
+    def status
+      return 'approved' if approved?
+      return 'cancelled' if cancelled?
+      return 'rejected' if rejected?
+      return 'pending' if pending?
+    end
+
     private
 
       def ensure_state_was_pending
