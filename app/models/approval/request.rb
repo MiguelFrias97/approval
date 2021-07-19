@@ -7,7 +7,9 @@ module Approval
       belongs_to :respond_user, class_name: Approval.config.user_class_name, optional: true
     end
 
-    belongs_to :tenant, class_name: 'Tenant', dependent: false
+    def self.define_tenant_association
+      belongs_to :tenant, dependent: false
+    end
 
     has_many :comments, class_name: :"Approval::Comment", inverse_of: :request, dependent: :destroy
     has_many :items,    class_name: :"Approval::Item",    inverse_of: :request, dependent: :destroy
@@ -16,8 +18,9 @@ module Approval
 
     scope :recently, -> { order(id: :desc) }
 
-    validates :state, :comments, :items, :tenant, presence: true
+    validates :state, :comments, :items, presence: true
     validates :respond_user, presence: true, unless: :pending?
+    validates :tenant, presence: true, if: :tenancy?
 
     validates_associated :comments
     validates_associated :items
@@ -61,6 +64,10 @@ module Approval
         if %w[pending approved].exclude?(state_was)
           errors.add(:base, :already_performed)
         end
+      end
+
+      def tenancy?
+        ::Approval.config.tenancy
       end
   end
 end
